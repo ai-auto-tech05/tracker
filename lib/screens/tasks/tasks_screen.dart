@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_dimensions.dart';
-import '../../core/utils/date_helper.dart';
 import '../../models/task_model.dart';
+import '../../providers/subscription_provider.dart';
 import '../../providers/task_provider.dart';
 import '../../widgets/common/empty_state.dart';
+import '../../widgets/common/upgrade_sheet.dart';
 import '../../widgets/tasks/task_tile.dart';
 import 'add_task_sheet.dart';
 import 'edit_task_screen.dart';
@@ -39,6 +40,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   void _showAddTask() {
+    final canCreate = ref.read(canCreateTaskProvider);
+    if (!canCreate) {
+      UpgradeSheet.show(context);
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -63,6 +69,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final filtered = _applyFilter(tasks);
     final notifier = ref.read(taskProvider.notifier);
     final overdueCount = notifier.overdueTasks.length;
+    final isPremium = ref.watch(isPremiumProvider);
+    final activeCount = ref.watch(activeTaskCountProvider);
+    final atLimit = !isPremium && activeCount >= kFreemiumTaskLimit;
 
     return Scaffold(
       body: CustomScrollView(
@@ -94,6 +103,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 const SizedBox(height: 8),
+                if (atLimit) ...[
+                  _FreemiumLimitBanner(onUpgrade: () => UpgradeSheet.show(context)),
+                  const SizedBox(height: 12),
+                ],
                 // Filter chips
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -221,6 +234,67 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             style: TextButton.styleFrom(
                 foregroundColor: AppColors.error),
             child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FreemiumLimitBanner extends StatelessWidget {
+  final VoidCallback onUpgrade;
+  const _FreemiumLimitBanner({required this.onUpgrade});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary.withOpacity(0.08),
+            AppColors.primaryLight.withOpacity(0.12),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+        border: Border.all(color: AppColors.primary.withOpacity(0.25)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.lock_outline_rounded,
+              size: 18, color: AppColors.primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              "You've reached your free limit of 3 active tasks. Upgrade to Premium for unlimited tasks.",
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.primary,
+                    height: 1.4,
+                  ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onUpgrade,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius:
+                    BorderRadius.circular(AppDimensions.radiusFull),
+              ),
+              child: const Text(
+                'Upgrade',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ],
       ),

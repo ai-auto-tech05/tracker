@@ -8,6 +8,7 @@ class UserModel {
   final int defaultLongBreakMinutes;
   final bool darkMode;
   final bool notificationsEnabled;
+  final bool isPremium;
   final DateTime createdAt;
 
   const UserModel({
@@ -20,6 +21,7 @@ class UserModel {
     this.defaultLongBreakMinutes = 15,
     this.darkMode = false,
     this.notificationsEnabled = true,
+    this.isPremium = false,
     required this.createdAt,
   });
 
@@ -32,6 +34,7 @@ class UserModel {
     int? defaultLongBreakMinutes,
     bool? darkMode,
     bool? notificationsEnabled,
+    bool? isPremium,
   }) {
     return UserModel(
       id: id,
@@ -47,6 +50,7 @@ class UserModel {
           defaultLongBreakMinutes ?? this.defaultLongBreakMinutes,
       darkMode: darkMode ?? this.darkMode,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      isPremium: isPremium ?? this.isPremium,
       createdAt: createdAt,
     );
   }
@@ -61,6 +65,7 @@ class UserModel {
         'defaultLongBreakMinutes': defaultLongBreakMinutes,
         'darkMode': darkMode,
         'notificationsEnabled': notificationsEnabled,
+        'isPremium': isPremium,
         'createdAt': createdAt.toIso8601String(),
       };
 
@@ -77,6 +82,7 @@ class UserModel {
             json['defaultLongBreakMinutes'] as int? ?? 15,
         darkMode: json['darkMode'] as bool? ?? false,
         notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+        isPremium: json['isPremium'] as bool? ?? false,
         createdAt: DateTime.parse(json['createdAt'] as String),
       );
 }
