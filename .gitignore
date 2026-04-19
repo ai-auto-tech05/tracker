@@ -1,0 +1,46 @@
+# Miscellaneous
+*.log
+*.tmp
+*.swp
+.DS_Store
+.idea/
+.vscode/
+
+# Dart / Flutter
+.dart_tool/
+.packages
+.pub/
+.pub-cache/
+build/
+
+# Flutter generated files
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+
+# Android
+android/.gradle/
+android/local.properties
+android/app/build/
+android/key.properties
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/App.framework
+
+# MacOS
+macos/Flutter/ephemeral/
+
+# Windows
+windows/flutter/ephemeral/
+
+# Linux
+linux/flutter/ephemeral/
+
+# Test
+coverage/
+
+# Generated plugin registrant
+lib/generated_plugin_registrant.dart

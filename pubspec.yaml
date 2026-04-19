@@ -1,0 +1,53 @@
+name: tracker
+description: A production-ready productivity, habit tracking, and focus timer app.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ── Firebase ────────────────────────────────────────────────────────────────
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.5.0
+  google_sign_in: ^6.2.1
+
+  # ── State Management ────────────────────────────────────────────────────────
+  flutter_riverpod: ^2.5.1
+
+  # ── Local Persistence (tasks / habits / focus — NOT auth) ───────────────────
+  hive_flutter: ^1.1.0
+
+  # ── Navigation ──────────────────────────────────────────────────────────────
+  go_router: ^13.2.3
+
+  # ── Charts & Analytics ──────────────────────────────────────────────────────
+  fl_chart: ^0.68.0
+
+  # ── Typography ──────────────────────────────────────────────────────────────
+  google_fonts: ^6.2.1
+
+  # ── Animations ──────────────────────────────────────────────────────────────
+  flutter_animate: ^4.5.0
+
+  # ── Progress Indicators ─────────────────────────────────────────────────────
+  percent_indicator: ^4.2.3
+
+  # ── Utilities ───────────────────────────────────────────────────────────────
+  uuid: ^4.4.0
+  intl: ^0.19.0
+
+  # ── Icons & UI ──────────────────────────────────────────────────────────────
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.2
+
+flutter:
+  uses-material-design: true

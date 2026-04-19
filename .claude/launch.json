@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Flutter Web Debug",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "chrome", "--web-port", "8080"],
+      "port": 8080
+    },
+    {
+      "name": "Flutter Debug (Device)",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "--debug"],
+      "port": 0
+    },
+    {
+      "name": "Flutter Release APK (ARM64)",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["build", "apk", "--release", "--split-per-abi"],
+      "port": 0
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+  <!-- Outer circle accent -->
+  <path
+      android:fillColor="#FFFFFF"
+      android:fillAlpha="0.15"
+      android:pathData="M54,20 A34,34 0 1,1 53.99,20 Z"/>
+
+  <!-- Checkmark / task icon -->
+  <path
+      android:strokeWidth="4"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"
+      android:strokeLineJoin="round"
+      android:fillColor="@android:color/transparent"
+      android:pathData="M36,54 L48,66 L72,42"/>
+
+  <!-- Small dot (streak indicator) -->
+  <path
+      android:fillColor="#F59E0B"
+      android:pathData="M66,72 A5,5 0 1,1 65.99,72 Z"/>
+</vector>
