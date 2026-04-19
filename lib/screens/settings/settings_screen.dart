@@ -6,8 +6,10 @@ import '../../core/constants/app_dimensions.dart';
 import '../../models/auth_user_model.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/common/app_card.dart';
+import '../../widgets/common/upgrade_sheet.dart';
 import '../auth/edit_email_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -38,6 +40,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final user = ref.watch(userProvider);
     final authUser = ref.watch(currentAuthUserProvider);
     final notifier = ref.read(userProvider.notifier);
+    final isPremium = ref.watch(isPremiumProvider);
     if (user == null) return const SizedBox.shrink();
 
     return Scaffold(
@@ -63,27 +66,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Row(
                         children: [
-                          // Avatar
-                          Container(
-                            width: 52,
-                            height: 52,
-                            decoration: const BoxDecoration(
-                              color: AppColors.primarySurface,
-                              shape: BoxShape.circle,
-                            ),
-                            child: authUser?.provider == AuthProvider.google
-                                ? const Center(
-                                    child: Text('G',
-                                        style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF4285F4),
-                                        )))
-                                : authUser?.provider == AuthProvider.guest
-                                    ? const Icon(Icons.person_outline_rounded,
-                                        color: AppColors.textSecondary, size: 24)
-                                    : const Icon(Icons.person_rounded,
-                                        color: AppColors.primary, size: 24),
+                          // Avatar with optional premium badge
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: 52,
+                                height: 52,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primarySurface,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: authUser?.provider ==
+                                        AuthProvider.google
+                                    ? const Center(
+                                        child: Text('G',
+                                            style: TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF4285F4),
+                                            )))
+                                    : authUser?.provider ==
+                                            AuthProvider.guest
+                                        ? const Icon(
+                                            Icons.person_outline_rounded,
+                                            color: AppColors.textSecondary,
+                                            size: 24)
+                                        : const Icon(Icons.person_rounded,
+                                            color: AppColors.primary,
+                                            size: 24),
+                              ),
+                              if (isPremium)
+                                Positioned(
+                                  bottom: -2,
+                                  right: -4,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.accent,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.workspace_premium_rounded,
+                                      size: 12,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -350,8 +380,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Premium upsell ────────────────────────────────────────
-                _buildPremiumCard(context),
+                // ── Subscription ──────────────────────────────────────────
+                if (isPremium)
+                  _buildPremiumBadgeCard(context, ref)
+                else
+                  _buildUpgradeCard(context),
                 const SizedBox(height: 16),
 
                 // ── Sign Out ──────────────────────────────────────────────
@@ -475,12 +508,87 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildPremiumCard(BuildContext context) {
+  Widget _buildUpgradeCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () => UpgradeSheet.show(context),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF6366F1), Color(0xFF4F46E5), Color(0xFF3730A3)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius:
+                        BorderRadius.circular(AppDimensions.radiusSm),
+                  ),
+                  child: const Icon(Icons.workspace_premium_rounded,
+                      color: AppColors.accentLight, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Go Premium',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700),
+                      ),
+                      Text(
+                        'Unlimited tasks, analytics, cloud sync & more',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(
+                                color: Colors.white.withOpacity(0.8)),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded,
+                    color: Colors.white, size: 20),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: const [
+                _PremiumChip(label: 'Unlimited tasks'),
+                _PremiumChip(label: 'AI suggestions'),
+                _PremiumChip(label: 'Calendar view'),
+                _PremiumChip(label: 'Cloud sync'),
+                _PremiumChip(label: 'Analytics'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPremiumBadgeCard(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryDark],
+          colors: [Color(0xFFFBBF24), Color(0xFFF59E0B), Color(0xFFD97706)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -488,40 +596,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.star_rounded,
-              color: AppColors.accentLight, size: 28),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.workspace_premium_rounded,
+                color: Colors.white, size: 24),
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Go Premium',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(color: Colors.white),
+                  'Premium Active',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
                 Text(
-                  'Cloud sync, advanced analytics & more',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(
-                          color: Colors.white.withOpacity(0.8)),
+                  'You have access to all premium features.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withOpacity(0.85),
+                      ),
                 ),
               ],
             ),
           ),
-          TextButton(
-            onPressed: () {},
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.2),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 8),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.25),
+              borderRadius:
+                  BorderRadius.circular(AppDimensions.radiusFull),
             ),
-            child: const Text('Upgrade'),
+            child: const Text(
+              'PRO',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+              ),
+            ),
           ),
         ],
       ),
@@ -774,6 +895,30 @@ class _InfoTile extends StatelessWidget {
                     color: AppColors.textSecondary,
                   )),
         ],
+      ),
+    );
+  }
+}
+
+class _PremiumChip extends StatelessWidget {
+  final String label;
+  const _PremiumChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

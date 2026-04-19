@@ -105,6 +105,17 @@ class UserNotifier extends StateNotifier<UserModel?> {
     }
   }
 
+  Future<void> setPremium(bool value) async {
+    final current = state;
+    if (current == null) return;
+    final updated = current.copyWith(isPremium: value);
+    await _hive.saveUser(updated);
+    state = updated;
+    if (_isCloudUser && _uid != null) {
+      _firestore.saveUserSettings(_uid!, updated).catchError((_) {});
+    }
+  }
+
   /// Pull settings from cloud and merge (cloud wins if exists).
   Future<void> syncFromCloud() async {
     if (!_isCloudUser || _uid == null) return;
