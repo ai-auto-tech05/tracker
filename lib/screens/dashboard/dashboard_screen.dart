@@ -18,11 +18,73 @@ import '../../widgets/tasks/task_tile.dart';
 import '../../widgets/habits/habit_tile.dart';
 import '../tasks/edit_task_screen.dart';
 
-class DashboardScreen extends ConsumerWidget {
+// Tracks the last date the daily progress banner was shown (once per day)
+final _bannerShownDateProvider = StateProvider<String?>((ref) => null);
+
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowBanner());
+  }
+
+  void _maybeShowBanner() {
+    if (!mounted) return;
+
+    final today = DateHelper.toStorageKey(DateHelper.today);
+    final lastShown = ref.read(_bannerShownDateProvider);
+    if (lastShown == today) return;
+    ref.read(_bannerShownDateProvider.notifier).state = today;
+
+    final tasks = ref.read(todayTasksProvider);
+    final habits = ref.read(todayHabitsProvider);
+    final pendingTasks = tasks.where((t) => !t.isCompleted).length;
+    final pendingHabits =
+        habits.where((h) => h.completionHistory[today] != true).length;
+
+    final String message;
+    if (pendingTasks == 0 && pendingHabits == 0) {
+      message = "You've completed everything today. Great work!";
+    } else if (pendingTasks == 0) {
+      message =
+          "Tasks all done! $pendingHabits habit${pendingHabits > 1 ? 's' : ''} left today.";
+    } else if (pendingHabits == 0) {
+      message =
+          "Habits done! $pendingTasks task${pendingTasks > 1 ? 's' : ''} remaining.";
+    } else {
+      message =
+          "$pendingTasks task${pendingTasks > 1 ? 's' : ''} · $pendingHabits habit${pendingHabits > 1 ? 's' : ''} left today. Keep going!";
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 5),
+        action: pendingTasks > 0
+            ? SnackBarAction(
+                label: 'Tasks',
+                onPressed: () => context.go(AppRoutes.tasks),
+              )
+            : pendingHabits > 0
+                ? SnackBarAction(
+                    label: 'Habits',
+                    onPressed: () => context.go(AppRoutes.habits),
+                  )
+                : null,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
     final todayTasks = ref.watch(todayTasksProvider);
     final todayHabits = ref.watch(todayHabitsProvider);
@@ -30,9 +92,10 @@ class DashboardScreen extends ConsumerWidget {
     final taskNotifier = ref.read(taskProvider.notifier);
     final habitNotifier = ref.read(habitProvider.notifier);
 
+    final today = DateHelper.toStorageKey(DateHelper.today);
     final completedTasks = todayTasks.where((t) => t.isCompleted).length;
     final completedHabits = todayHabits
-        .where((h) => habitNotifier.isCompletedToday(h.id))
+        .where((h) => h.completionHistory[today] == true)
         .length;
     final appStreak = habitNotifier.appStreakDays;
     final focusMinutes = focusState.sessions
@@ -137,7 +200,7 @@ class DashboardScreen extends ConsumerWidget {
                           .take(5)
                           .map((h) {
                             final isComplete =
-                                habitNotifier.isCompletedToday(h.id);
+                                h.completionHistory[today] == true;
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                               child: HabitCheckRow(

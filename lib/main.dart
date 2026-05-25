@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'services/hive_service.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
+import 'services/notification_service.dart';
 import 'app.dart';
 
 Future<void> main() async {
@@ -35,6 +36,9 @@ Future<void> main() async {
 
   // 4. Firestore offline persistence
   await FirestoreService().init();
+
+  // 5. Notifications (heads-up channel + permission request)
+  await NotificationService().init();
 
   runApp(
     const ProviderScope(

@@ -350,10 +350,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Premium upsell ────────────────────────────────────────
-                _buildPremiumCard(context),
-                const SizedBox(height: 16),
-
                 // ── Sign Out ──────────────────────────────────────────────
                 SizedBox(
                   width: double.infinity,
@@ -469,59 +465,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       : AppColors.primary,
                   fontWeight: FontWeight.w600,
                 ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPremiumCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.star_rounded,
-              color: AppColors.accentLight, size: 28),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Go Premium',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(color: Colors.white),
-                ),
-                Text(
-                  'Cloud sync, advanced analytics & more',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(
-                          color: Colors.white.withOpacity(0.8)),
-                ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () {},
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.2),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 8),
-            ),
-            child: const Text('Upgrade'),
           ),
         ],
       ),

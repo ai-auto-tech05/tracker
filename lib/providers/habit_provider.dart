@@ -191,7 +191,13 @@ class HabitNotifier extends StateNotifier<List<HabitModel>> {
 }
 
 final todayHabitsProvider = Provider<List<HabitModel>>((ref) {
-  return ref.watch(habitProvider.notifier).todayHabits;
+  final habits = ref.watch(habitProvider);
+  final now = DateTime.now();
+  return habits.where((h) {
+    if (h.frequency == HabitFrequency.daily) return true;
+    if (h.targetWeekdays.isEmpty) return true;
+    return h.targetWeekdays.contains(now.weekday);
+  }).toList();
 });
 
 final habitCompletedTodayProvider = Provider<int>((ref) {
