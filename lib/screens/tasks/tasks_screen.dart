@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_dimensions.dart';
-import '../../core/utils/date_helper.dart';
 import '../../models/task_model.dart';
 import '../../providers/task_provider.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/tasks/task_tile.dart';
+import '../../widgets/tasks/task_funeral_tile.dart';
 import 'add_task_sheet.dart';
 import 'edit_task_screen.dart';
 
@@ -141,6 +141,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       ),
                     ),
                   ),
+                // ── Task Graveyard ─────────────────────────────────────────
+                _GraveyardSection(),
                 const SizedBox(height: 100),
               ]),
             ),
@@ -203,8 +205,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete Task'),
-        content: Text('Delete "${task.title}"?'),
+        title: const Text('Remove task?'),
+        content: Text('"${task.title}"'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -213,17 +215,93 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ref.read(taskProvider.notifier).deleteTask(task.id);
+              ref.read(taskProvider.notifier).buryTask(task.id);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Task deleted')),
+                const SnackBar(
+                  content: Text('Task sent to the graveyard. RIP.'),
+                ),
               );
             },
-            style: TextButton.styleFrom(
-                foregroundColor: AppColors.error),
+            child: const Text('⚰️ Bury'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(taskProvider.notifier).deleteTask(task.id);
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('Delete'),
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Task Graveyard section ───────────────────────────────────────────────────
+
+class _GraveyardSection extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_GraveyardSection> createState() => _GraveyardSectionState();
+}
+
+class _GraveyardSectionState extends ConsumerState<_GraveyardSection> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final buried = ref.watch(buriedTasksProvider);
+    if (buried.isEmpty) return const SizedBox.shrink();
+
+    final notifier = ref.read(taskProvider.notifier);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Row(
+            children: [
+              const Text('⚰️', style: TextStyle(fontSize: 16)),
+              const SizedBox(width: 8),
+              Text(
+                'Task Graveyard (${buried.length})',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              const Spacer(),
+              Icon(
+                _expanded
+                    ? Icons.keyboard_arrow_up_rounded
+                    : Icons.keyboard_arrow_down_rounded,
+                color: AppColors.textTertiary,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+        if (_expanded) ...[
+          const SizedBox(height: 12),
+          ...buried.map(
+            (task) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: TaskFuneralTile(
+                task: task,
+                onRevive: () {
+                  notifier.reviveTask(task.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Task revived. Try not to bury it again.')),
+                  );
+                },
+                onDelete: () => notifier.deleteTask(task.id),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

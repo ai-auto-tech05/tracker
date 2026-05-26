@@ -43,6 +43,8 @@ class TaskModel {
   final DateTime createdAt;
   final DateTime? completedAt;
   final List<String> tags;
+  final bool isBuried;
+  final DateTime? buriedAt;
 
   const TaskModel({
     required this.id,
@@ -54,6 +56,8 @@ class TaskModel {
     required this.createdAt,
     this.completedAt,
     this.tags = const [],
+    this.isBuried = false,
+    this.buriedAt,
   });
 
   bool get isCompleted => status == TaskStatus.done;
@@ -74,6 +78,9 @@ class TaskModel {
     bool clearDueDate = false,
     DateTime? completedAt,
     List<String>? tags,
+    bool? isBuried,
+    DateTime? buriedAt,
+    bool clearBuriedAt = false,
   }) {
     return TaskModel(
       id: id,
@@ -85,6 +92,8 @@ class TaskModel {
       createdAt: createdAt,
       completedAt: completedAt ?? this.completedAt,
       tags: tags ?? this.tags,
+      isBuried: isBuried ?? this.isBuried,
+      buriedAt: clearBuriedAt ? null : (buriedAt ?? this.buriedAt),
     );
   }
 
@@ -98,6 +107,8 @@ class TaskModel {
         'createdAt': createdAt.toIso8601String(),
         'completedAt': completedAt?.toIso8601String(),
         'tags': tags,
+        'isBuried': isBuried,
+        'buriedAt': buriedAt?.toIso8601String(),
       };
 
   factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
@@ -117,5 +128,9 @@ class TaskModel {
                 ?.map((e) => e as String)
                 .toList() ??
             [],
+        isBuried: json['isBuried'] as bool? ?? false,
+        buriedAt: json['buriedAt'] != null
+            ? DateTime.parse(json['buriedAt'] as String)
+            : null,
       );
 }

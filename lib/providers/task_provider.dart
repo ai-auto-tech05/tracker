@@ -107,6 +107,30 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
     }
   }
 
+  Future<void> buryTask(String id) async {
+    final task = state.firstWhere((t) => t.id == id);
+    final updated = task.copyWith(isBuried: true, buriedAt: DateTime.now());
+    await _hive.saveTask(updated);
+    state = state.map((t) => t.id == id ? updated : t).toList();
+    if (_isCloudUser && _uid != null) {
+      _firestore.saveTask(_uid!, updated).catchError((_) {});
+    }
+  }
+
+  Future<void> reviveTask(String id) async {
+    final task = state.firstWhere((t) => t.id == id);
+    final updated = task.copyWith(
+      isBuried: false,
+      clearBuriedAt: true,
+      status: TaskStatus.todo,
+    );
+    await _hive.saveTask(updated);
+    state = state.map((t) => t.id == id ? updated : t).toList();
+    if (_isCloudUser && _uid != null) {
+      _firestore.saveTask(_uid!, updated).catchError((_) {});
+    }
+  }
+
   /// Pull from cloud, merge with local, push local-only to cloud.
   Future<void> syncFromCloud() async {
     if (!_isCloudUser || _uid == null) return;
@@ -139,6 +163,7 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
 
   List<TaskModel> get todayTasks => state.where((t) {
         if (t.isCompleted) return false;
+        if (t.isBuried) return false;
         return t.isDueToday || t.isOverdue || t.dueDate == null;
       }).toList();
 
@@ -169,4 +194,8 @@ final todayTasksProvider = Provider<List<TaskModel>>((ref) {
 
 final overdueTasksProvider = Provider<List<TaskModel>>((ref) {
   return ref.watch(taskProvider.notifier).overdueTasks;
+});
+
+final buriedTasksProvider = Provider<List<TaskModel>>((ref) {
+  return ref.watch(taskProvider).where((t) => t.isBuried).toList();
 });

@@ -11,11 +11,14 @@ import '../../providers/user_provider.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/focus_provider.dart';
+import '../../providers/app_notification_provider.dart';
 import '../../widgets/common/app_card.dart';
 import '../../widgets/common/section_header.dart';
 import '../../widgets/common/empty_state.dart';
 import '../../widgets/tasks/task_tile.dart';
 import '../../widgets/habits/habit_tile.dart';
+import '../../widgets/dashboard/shame_meter_card.dart';
+import '../../widgets/dashboard/ghost_competitor_card.dart';
 import '../tasks/edit_task_screen.dart';
 
 // Tracks the last date the daily progress banner was shown (once per day)
@@ -125,6 +128,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 if (appStreak > 0)
                   _buildStreakBanner(context, appStreak),
                 const SizedBox(height: 16),
+                // ── Shame Meter ────────────────────────────────────────────
+                const ShameMeterCard(),
+                const SizedBox(height: 16),
                 // ── Progress card ──────────────────────────────────────────
                 _buildProgressCard(
                   context,
@@ -138,6 +144,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 const SizedBox(height: 24),
                 // ── Quick action cards ─────────────────────────────────────
                 _buildQuickActions(context),
+                const SizedBox(height: 24),
+                // ── Ghost Competitor ───────────────────────────────────────
+                const GhostCompetitorCard(),
                 const SizedBox(height: 24),
                 // ── Today's Tasks ──────────────────────────────────────────
                 SectionHeader(
@@ -246,6 +255,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ],
       ),
       actions: [
+        _NotifBellButton(),
         IconButton(
           icon: const Icon(Icons.settings_outlined),
           onPressed: () => context.go(AppRoutes.settings),
@@ -464,6 +474,52 @@ class _StatChip extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─── Notification bell with unread badge ──────────────────────────────────────
+
+class _NotifBellButton extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = ref.watch(unreadNotifCountProvider);
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined),
+          onPressed: () => context.go(AppRoutes.notifications),
+          color: AppColors.textSecondary,
+        ),
+        if (unread > 0)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(
+                color: AppColors.error,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  width: 1.5,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  unread > 9 ? '9+' : '$unread',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 7,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

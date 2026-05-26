@@ -93,6 +93,7 @@ class UserNotifier extends StateNotifier<UserModel?> {
     int? defaultFocusDurationMinutes,
     int? defaultShortBreakMinutes,
     int? defaultLongBreakMinutes,
+    bool? chaosModeEnabled,
   }) async {
     final current = state;
     if (current == null) return;
@@ -103,6 +104,7 @@ class UserNotifier extends StateNotifier<UserModel?> {
       defaultFocusDurationMinutes: defaultFocusDurationMinutes,
       defaultShortBreakMinutes: defaultShortBreakMinutes,
       defaultLongBreakMinutes: defaultLongBreakMinutes,
+      chaosModeEnabled: chaosModeEnabled,
     );
     await _hive.saveUser(updated);
     state = updated;

@@ -18,6 +18,7 @@ import '../screens/habits/habits_screen.dart';
 import '../screens/focus/focus_screen.dart';
 import '../screens/analytics/analytics_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/notifications/notification_center_screen.dart';
 
 class AppRoutes {
   static const String splash = '/splash';
@@ -32,7 +33,8 @@ class AppRoutes {
   static const String habits = '/habits';
   static const String focus = '/focus';
   static const String analytics = '/analytics';
-  static const String settings = '/settings';
+  static const String settings       = '/settings';
+  static const String notifications  = '/notifications';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -160,6 +162,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.settings,
             pageBuilder: (_, state) =>
                 _noTransitionPage(state, const SettingsScreen()),
+          ),
+          GoRoute(
+            path: AppRoutes.notifications,
+            pageBuilder: (_, state) =>
+                _noTransitionPage(state, const NotificationCenterScreen()),
           ),
         ],
       ),

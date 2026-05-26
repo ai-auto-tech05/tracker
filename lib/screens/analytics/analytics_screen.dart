@@ -6,6 +6,8 @@ import '../../core/utils/date_helper.dart';
 import '../../models/habit_model.dart';
 import '../../providers/analytics_provider.dart';
 import '../../providers/habit_provider.dart';
+import '../../models/task_model.dart';
+import '../../providers/task_provider.dart';
 import '../../widgets/common/app_card.dart';
 import '../../widgets/analytics/weekly_bar_chart.dart';
 
@@ -16,6 +18,8 @@ class AnalyticsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(analyticsProvider);
     final habits = ref.watch(habitProvider);
+    final buried = ref.watch(buriedTasksProvider);
+    final overdue = ref.watch(overdueTasksProvider);
 
     return Scaffold(
       body: CustomScrollView(
@@ -75,6 +79,9 @@ class AnalyticsScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: 24),
+                // ── Reality Check ──────────────────────────────────────────
+                _buildRealityCheck(context, buried, overdue),
                 const SizedBox(height: 100),
               ]),
             ),
@@ -185,6 +192,151 @@ class AnalyticsScreen extends ConsumerWidget {
             icon: Icons.bar_chart_rounded,
             color: AppColors.accent,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+  Widget _buildRealityCheck(
+    BuildContext context,
+    List<TaskModel> buried,
+    List<TaskModel> overdue,
+  ) {
+    final wastedTasks = buried.length + overdue.length;
+    final wastedMin = wastedTasks * 30; // 30 min avg per forgotten task
+    final wastedHours = (wastedMin / 60).toStringAsFixed(1);
+    final yearlyHours = (wastedTasks * 365 * 30 / 60).toStringAsFixed(0);
+
+    // Tag frequency analysis
+    final tagCount = <String, int>{};
+    for (final t in buried) {
+      for (final tag in t.tags) {
+        tagCount[tag] = (tagCount[tag] ?? 0) + 1;
+      }
+    }
+    final topTag = tagCount.isEmpty
+        ? null
+        : (tagCount.entries.toList()
+              ..sort((a, b) => b.value.compareTo(a.value)))
+            .first;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '🔍 Reality Check',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "The honest numbers you've been avoiding.",
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+        ),
+        const SizedBox(height: 12),
+        AppCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _RealityRow(
+                icon: Icons.grading_rounded,
+                label: 'Buried / overdue tasks',
+                value: '$wastedTasks',
+                color: wastedTasks == 0
+                    ? AppColors.success
+                    : AppColors.error,
+              ),
+              const Divider(height: 20),
+              _RealityRow(
+                icon: Icons.hourglass_bottom_rounded,
+                label: 'Time invested in forgotten tasks',
+                value: '~$wastedHours hrs',
+                color: AppColors.warning,
+                sub: 'based on 30 min avg per task',
+              ),
+              const Divider(height: 20),
+              _RealityRow(
+                icon: Icons.calendar_today_rounded,
+                label: 'Yearly waste if you keep this up',
+                value: '~$yearlyHours hrs/yr',
+                color: AppColors.error,
+                sub: "That's ${(int.tryParse(yearlyHours) ?? 0) ~/ 8} workdays.",
+              ),
+              if (topTag != null) ...[
+                const Divider(height: 20),
+                _RealityRow(
+                  icon: Icons.label_rounded,
+                  label: 'Most buried category',
+                  value: '#${topTag.key}',
+                  color: AppColors.accent,
+                  sub: '${topTag.value} task${topTag.value > 1 ? 's' : ''} buried',
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RealityRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+  final String? sub;
+
+  const _RealityRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+    this.sub,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          ),
+          child: Icon(icon, size: 18, color: color),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              if (sub != null)
+                Text(
+                  sub!,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                ),
+            ],
+          ),
+        ),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
         ),
       ],
     );

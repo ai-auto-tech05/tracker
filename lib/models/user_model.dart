@@ -11,6 +11,7 @@ class UserModel {
   // Quiz-derived fields — set during onboarding
   final String productivityProfile; // e.g. "Last-Minute Survivor"
   final String notificationStyle;   // 'gentle' | 'sarcastic' | 'brutal'
+  final bool chaosModeEnabled;
   final DateTime createdAt;
 
   const UserModel({
@@ -25,6 +26,7 @@ class UserModel {
     this.notificationsEnabled = true,
     this.productivityProfile = '',
     this.notificationStyle = 'sarcastic',
+    this.chaosModeEnabled = false,
     required this.createdAt,
   });
 
@@ -39,6 +41,7 @@ class UserModel {
     bool? notificationsEnabled,
     String? productivityProfile,
     String? notificationStyle,
+    bool? chaosModeEnabled,
   }) {
     return UserModel(
       id: id,
@@ -56,6 +59,7 @@ class UserModel {
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       productivityProfile: productivityProfile ?? this.productivityProfile,
       notificationStyle: notificationStyle ?? this.notificationStyle,
+      chaosModeEnabled: chaosModeEnabled ?? this.chaosModeEnabled,
       createdAt: createdAt,
     );
   }
@@ -72,6 +76,7 @@ class UserModel {
         'notificationsEnabled': notificationsEnabled,
         'productivityProfile': productivityProfile,
         'notificationStyle': notificationStyle,
+        'chaosModeEnabled': chaosModeEnabled,
         'createdAt': createdAt.toIso8601String(),
       };
 
@@ -90,6 +95,7 @@ class UserModel {
         notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
         productivityProfile: json['productivityProfile'] as String? ?? '',
         notificationStyle: json['notificationStyle'] as String? ?? 'sarcastic',
+        chaosModeEnabled: json['chaosModeEnabled'] as bool? ?? false,
         createdAt: DateTime.parse(json['createdAt'] as String),
       );
 }

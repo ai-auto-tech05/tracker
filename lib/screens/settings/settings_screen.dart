@@ -296,6 +296,91 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const SizedBox(height: 24),
 
+                const SizedBox(height: 24),
+
+                // ── Personality Profile ────────────────────────────────────
+                if (user.productivityProfile.isNotEmpty) ...[
+                  _SectionLabel(label: 'Personality'),
+                  AppCard(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.primarySurface,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                              child:
+                                  Text('🧠', style: TextStyle(fontSize: 20))),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.productivityProfile,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                        fontWeight: FontWeight.w600),
+                              ),
+                              Text(
+                                '${user.notificationStyle[0].toUpperCase()}${user.notificationStyle.substring(1)} notification style',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
+                // ── Chaos Mode ────────────────────────────────────────────
+                _SectionLabel(label: '🌪️ Chaos Mode'),
+                AppCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      _ToggleTile(
+                        label: 'Enable Chaos Mode',
+                        icon: Icons.warning_amber_rounded,
+                        value: user.chaosModeEnabled,
+                        onChanged: (v) =>
+                            notifier.updateSettings(chaosModeEnabled: v),
+                      ),
+                      if (user.chaosModeEnabled) ...[
+                        const Divider(height: 1),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          child: Text(
+                            "Screen shake, scanlines, random sarcastic pop-ups every few seconds. You asked for this.",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
                 // ── Data ──────────────────────────────────────────────────
                 _SectionLabel(label: 'Data'),
                 AppCard(

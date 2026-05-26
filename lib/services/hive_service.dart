@@ -5,6 +5,7 @@ import '../models/task_model.dart';
 import '../models/habit_model.dart';
 import '../models/focus_session_model.dart';
 import '../models/daily_progress_model.dart';
+import '../models/app_notification_model.dart';
 
 class HiveService {
   static final HiveService _instance = HiveService._internal();
@@ -17,6 +18,7 @@ class HiveService {
   static const String _focusBox = 'focus_box';
   static const String _progressBox = 'progress_box';
   static const String _settingsBox = 'settings_box';
+  static const String _notifBox    = 'notif_box';
 
   static const String _userKey = 'current_user';
 
@@ -29,6 +31,7 @@ class HiveService {
       Hive.openBox<String>(_focusBox),
       Hive.openBox<String>(_progressBox),
       Hive.openBox<dynamic>(_settingsBox),
+      Hive.openBox<String>(_notifBox),
     ]);
   }
 
@@ -162,6 +165,35 @@ class HiveService {
       ..sort((a, b) => a.date.compareTo(b.date));
   }
 
+  // ─── In-App Notifications ────────────────────────────────────────────────
+
+  Box<String> get _notifs => Hive.box<String>(_notifBox);
+
+  Future<void> saveNotification(AppNotificationModel n) async {
+    await _notifs.put(n.id, jsonEncode(n.toJson()));
+  }
+
+  Future<void> deleteNotification(String id) async {
+    await _notifs.delete(id);
+  }
+
+  List<AppNotificationModel> getAllNotifications() {
+    return _notifs.values
+        .map((raw) {
+          try {
+            return AppNotificationModel.fromJson(
+                jsonDecode(raw) as Map<String, dynamic>);
+          } catch (_) {
+            return null;
+          }
+        })
+        .whereType<AppNotificationModel>()
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  Future<void> clearAllNotifications() async => _notifs.clear();
+
   // ─── Settings ────────────────────────────────────────────────────────────
 
   Box<dynamic> get _settings => Hive.box<dynamic>(_settingsBox);
@@ -182,6 +214,7 @@ class HiveService {
       _focus.clear(),
       _progress.clear(),
       _settings.clear(),
+      _notifs.clear(),
     ]);
   }
 }
