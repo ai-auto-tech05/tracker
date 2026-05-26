@@ -36,11 +36,17 @@ class UserNotifier extends StateNotifier<UserModel?> {
     state = _hive.getUser();
   }
 
-  Future<void> createUser(String name) async {
+  Future<void> createUser(
+    String name, {
+    String productivityProfile = '',
+    String notificationStyle = 'sarcastic',
+  }) async {
     final user = UserModel(
       id: _uid ?? const Uuid().v4(),
       name: name,
       onboardingCompleted: false,
+      productivityProfile: productivityProfile,
+      notificationStyle: notificationStyle,
       createdAt: DateTime.now(),
     );
     await _hive.saveUser(user);

@@ -8,6 +8,9 @@ class UserModel {
   final int defaultLongBreakMinutes;
   final bool darkMode;
   final bool notificationsEnabled;
+  // Quiz-derived fields — set during onboarding
+  final String productivityProfile; // e.g. "Last-Minute Survivor"
+  final String notificationStyle;   // 'gentle' | 'sarcastic' | 'brutal'
   final DateTime createdAt;
 
   const UserModel({
@@ -20,6 +23,8 @@ class UserModel {
     this.defaultLongBreakMinutes = 15,
     this.darkMode = false,
     this.notificationsEnabled = true,
+    this.productivityProfile = '',
+    this.notificationStyle = 'sarcastic',
     required this.createdAt,
   });
 
@@ -32,6 +37,8 @@ class UserModel {
     int? defaultLongBreakMinutes,
     bool? darkMode,
     bool? notificationsEnabled,
+    String? productivityProfile,
+    String? notificationStyle,
   }) {
     return UserModel(
       id: id,
@@ -47,6 +54,8 @@ class UserModel {
           defaultLongBreakMinutes ?? this.defaultLongBreakMinutes,
       darkMode: darkMode ?? this.darkMode,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      productivityProfile: productivityProfile ?? this.productivityProfile,
+      notificationStyle: notificationStyle ?? this.notificationStyle,
       createdAt: createdAt,
     );
   }
@@ -61,6 +70,8 @@ class UserModel {
         'defaultLongBreakMinutes': defaultLongBreakMinutes,
         'darkMode': darkMode,
         'notificationsEnabled': notificationsEnabled,
+        'productivityProfile': productivityProfile,
+        'notificationStyle': notificationStyle,
         'createdAt': createdAt.toIso8601String(),
       };
 
@@ -77,6 +88,8 @@ class UserModel {
             json['defaultLongBreakMinutes'] as int? ?? 15,
         darkMode: json['darkMode'] as bool? ?? false,
         notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+        productivityProfile: json['productivityProfile'] as String? ?? '',
+        notificationStyle: json['notificationStyle'] as String? ?? 'sarcastic',
         createdAt: DateTime.parse(json['createdAt'] as String),
       );
 }
