@@ -196,7 +196,6 @@ class AnalyticsScreen extends ConsumerWidget {
       ],
     );
   }
-}
 
   Widget _buildRealityCheck(
     BuildContext context,

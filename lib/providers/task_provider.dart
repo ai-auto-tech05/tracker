@@ -189,11 +189,17 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
 }
 
 final todayTasksProvider = Provider<List<TaskModel>>((ref) {
-  return ref.watch(taskProvider.notifier).todayTasks;
+  final tasks = ref.watch(taskProvider); // watch STATE so UI rebuilds on toggle
+  return tasks.where((t) {
+    if (t.isCompleted) return false;
+    if (t.isBuried) return false;
+    return t.isDueToday || t.isOverdue || t.dueDate == null;
+  }).toList();
 });
 
 final overdueTasksProvider = Provider<List<TaskModel>>((ref) {
-  return ref.watch(taskProvider.notifier).overdueTasks;
+  final tasks = ref.watch(taskProvider); // watch STATE
+  return tasks.where((t) => t.isOverdue).toList();
 });
 
 final buriedTasksProvider = Provider<List<TaskModel>>((ref) {
