@@ -6,6 +6,8 @@ import 'services/hive_service.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'services/notification_service.dart';
+import 'services/widget_update_service.dart';
+import 'core/observers/widget_sync_observer.dart';
 import 'app.dart';
 
 Future<void> main() async {
@@ -40,9 +42,13 @@ Future<void> main() async {
   // 5. Notifications (heads-up channel + permission request)
   await NotificationService().init();
 
+  // 6. Home-screen widget shared storage
+  await WidgetUpdateService.init();
+
   runApp(
-    const ProviderScope(
-      child: TrackerApp(),
+    ProviderScope(
+      observers: [WidgetSyncObserver()],
+      child: const TrackerApp(),
     ),
   );
 }
