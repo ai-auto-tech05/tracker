@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Tracker</string>
-    <string name="widget_description">Your top tasks and habit streaks at a glance.</string>
+    <string name="task_widget_description">Your top tasks sorted by due date.</string>
+    <string name="habit_widget_description">Today\'s habit streaks at a glance.</string>
 </resources>

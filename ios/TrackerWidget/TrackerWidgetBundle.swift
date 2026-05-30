@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct TrackerWidgetBundle: WidgetBundle {
     var body: some Widget {
-        TrackerWidget()
+        TrackerTaskWidget()   // "Tasks" — top 4 by due date
+        TrackerHabitWidget()  // "Habits" — today's streaks
     }
 }
